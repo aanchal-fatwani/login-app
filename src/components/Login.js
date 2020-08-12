@@ -9,6 +9,7 @@ export default function Login() {
   const [passwordErr, setPasswordErr] = useState(false);
   const [err, setError] = useState("");
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [keepStatus, setKeepStatus] = useState(false)
 
   const usernameHandler = (event) => {
     setUsername(event.target.value);
@@ -42,13 +43,23 @@ export default function Login() {
     })
       .then((response) => response.json())
       .then((json) => {
-        if (json && json.token) setLoginSuccess(true);
+        if (json && json.token) {setLoginSuccess(true); setLoginData(username)}
         if (json && json.error) setError(json.error);
       });
   };
+  const keepStatusHandler = (event) =>{
+    setKeepStatus(event.target.checked)
+  }
+  const setLoginData = (val) =>{
+    let d = new Date();
+    let expTime = keepStatus ? 10 : 3; //If want to be kept logged in then 10 mins exp else 3 mins
+    d.setTime(d.getTime() + (expTime*60*1000));
+    let expires = `expires=${d.toUTCString()}`;
+    document.cookie = `login=${btoa(val)};${expires};path=/`;
+  }
   return (
     <>
-      {loginSuccess ? (
+      {loginSuccess || (document.cookie.indexOf('login')>-1) ? (
         <Redirect to={{ pathname: "/users", loginSuccess}}/>
       ) : (
         <div className="background">
@@ -80,7 +91,7 @@ export default function Login() {
             {err ? <div className="err">{err}</div> : null}
             <div className="bottomAr">
               <div className="keep">
-                <input type="checkbox" className="check" />
+                <input type="checkbox" className="check" onChange={keepStatusHandler} checked={keepStatus}/>
                 Keep me logged in
               </div>
               <div>

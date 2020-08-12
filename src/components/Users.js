@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, Redirect, useLocation } from "react-router-dom";
 
-export default function Users(props) {
+export default function Users() {
   const [searchResults, setSearchResults] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -27,9 +27,7 @@ export default function Users(props) {
 
   return (
     <>
-    {location && !location.loginSuccess ? (
-      <Redirect to={{ pathname: "/login"}}/>
-    ) : (
+    {((location && location.loginSuccess) || (document.cookie.indexOf('login')>-1)) ?  (
     <div className="users">
       <h1>Users</h1>
       {searchResults.length ? (
@@ -39,11 +37,11 @@ export default function Users(props) {
               {u.first_name && (
                 <div className="usernameList" key={index}>
                   <div>
-                    <Link to={{ pathname: "/users/" + u.id, loginSuccess:location.loginSuccess}}>
+                    <Link to={{ pathname: "/users/" + u.id, loginSuccess:true}}>
                       <img src={u.avatar} className="avatar" alt={u.first_name}/>
                     </Link>
                   </div>
-                  <Link to={{ pathname: "/users/" + u.id, loginSuccess:location.loginSuccess}}>
+                  <Link to={{ pathname: "/users/" + u.id, loginSuccess:true}}>
                     <div className="df fdc">
                       <div className="userListName">
                         {u.first_name} {u.last_name}
@@ -62,7 +60,9 @@ export default function Users(props) {
           NEXT
         </button>
       ) : null}
-    </div>)}
+    </div>):(
+      <Redirect to={{ pathname: "/login"}}/>
+    ) }
     </>
   );
 }
